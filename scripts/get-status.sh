@@ -60,17 +60,26 @@ if [ -f "$WALLETS_FILE" ]; then
 import json
 import subprocess
 
+# Load wallets
 with open('/root/midnight-miner/wallets.json') as f:
     wallets = json.load(f)
 
+# Get all solution logs once
+result = subprocess.run(
+    ['journalctl', '-u', 'midnight-miner', '--no-pager'],
+    capture_output=True, text=True
+)
+
+# Parse solution lines and count per wallet
+solution_lines = [line for line in result.stdout.split('\n') if 'Solution accepted' in line]
+
 for i, wallet in enumerate(wallets):
     addr = wallet['address']
-    # Count solutions for this address from logs
-    result = subprocess.run(
-        ['journalctl', '-u', 'midnight-miner', '--grep', addr],
-        capture_output=True, text=True
-    )
-    solution_count = result.stdout.count('Solution accepted')
+    # Use first 39 chars as address prefix (logs truncate around 40 chars)
+    addr_prefix = addr[:39]
+
+    # Count solutions for this address
+    solution_count = sum(1 for line in solution_lines if addr_prefix in line)
 
     print(f"| {i+1} | {addr[:20]}... | {solution_count} |")
 PYEOF
