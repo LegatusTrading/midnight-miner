@@ -14,6 +14,7 @@ help:
 	@echo "  start-<host>  - Start mining process"
 	@echo "  stop-<host>   - Stop mining process"
 	@echo "  status-<host> - Show mining status and save to status.md"
+	@echo "  status-all    - Show summary status for all VPSs"
 	@echo "  backup-<host> - Backup wallets and status to local data/ folder"
 	@echo ""
 	@echo "Example:"
@@ -163,6 +164,10 @@ stop:
 status:
 	@echo "Usage: make status-<host>"
 	@echo "Example: make status-v01"
+
+# All VPS status summary
+status-all:
+	@./status-all.sh
 
 backup:
 	@echo "Usage: make backup-<host>"
