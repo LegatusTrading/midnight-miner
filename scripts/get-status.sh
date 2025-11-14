@@ -53,8 +53,8 @@ if [ -f "$WALLETS_FILE" ]; then
     # Solutions per wallet
     echo "### Solutions per Wallet"
     echo ""
-    echo "| Wallet | Address | Solutions |"
-    echo "|--------|---------|-----------|"
+    echo "| Wallet | Address | Solutions | Verify |"
+    echo "|--------|---------|-----------|--------|"
 
     python3 << PYEOF
 import json
@@ -81,7 +81,10 @@ for i, wallet in enumerate(wallets):
     # Count solutions for this address
     solution_count = sum(1 for line in solution_lines if addr_prefix in line)
 
-    print(f"| {i+1} | {addr[:20]}... | {solution_count} |")
+    # Create verification link
+    verify_link = f"[API](https://sm.midnight.gd/api/statistics/{addr})"
+
+    print(f"| {i+1} | {addr[:20]}... | {solution_count} | {verify_link} |")
 PYEOF
 else
     echo "No wallets file found"
