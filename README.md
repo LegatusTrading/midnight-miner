@@ -12,18 +12,110 @@ Midnight Miner is a complete mining solution that combines:
 
 ## Features
 
+- **HD Wallet Support** - Single recovery phrase controls all wallets (CIP-1852 standard)
+- **Local & VPS Execution** - Run on your machine or deploy to cloud servers
 - Automated VPS initialization with user setup and SSH keys
 - One-command deployment and updates
-- Multi-wallet mining with BIP39 mnemonic support
+- Multi-wallet mining with proper key derivation
 - Real-time status monitoring and backup
 - Systemd service for automatic restarts
 - Clean separation of code and sensitive data
 
+## Installation
+
+### Prerequisites
+
+Before running the miner, ensure you have the required dependencies:
+
+```bash
+# Install jq (JSON processor)
+sudo apt install jq  # Ubuntu/Debian
+# or
+brew install jq      # macOS
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+### Cardano Tools (for HD Wallet generation)
+
+The project includes `cardano-address` binary. If you need `cardano-cli`:
+
+```bash
+# Download cardano-cli binary
+mkdir -p ~/.local/bin
+# Visit https://github.com/IntersectMBO/cardano-node/releases
+# Download latest cardano-cli for your platform
+# Extract and place in ~/.local/bin/cardano-cli
+chmod +x ~/.local/bin/cardano-cli
+```
+
 ## Quick Start
 
-See [QUICKSTART.md](QUICKSTART.md) for step-by-step instructions.
+### Local Mining (No VPS Required)
 
-**TL;DR:**
+**Simplified Setup** - Everything in one command:
+
+```bash
+# Complete setup (environment + HD wallet + import)
+make setup-local
+
+# BACKUP THE MNEMONIC! (This controls all wallets)
+cp hd-wallets/mnemonic.txt ~/BACKUP/
+
+# Start mining
+make start-local
+
+# Monitor live (filtered output - recommended!)
+make watch-local
+```
+
+**Manual Setup** - Step by step:
+
+```bash
+# 1. Generate HD wallet
+# NOTE: Can be configured to derive desired number of derivations
+make generate-hd-wallet
+
+# 2. BACKUP THE MNEMONIC!
+cp hd-wallets/mnemonic.txt ~/BACKUP/
+
+# 3. Import to miner format
+make import-hd-wallet
+
+# 4. Setup environment
+make init-local
+
+# 5. Start mining
+make start-local
+
+# 6. Monitor
+make watch-local
+```
+
+**Monitoring Commands:**
+
+```bash
+make watch-local    # Live filtered logs (recommended!)
+make status-local   # Quick status snapshot
+make events-local   # Recent events summary
+make wallets-local  # List wallet addresses
+```
+
+**Troubleshooting:**
+
+If you have old wallets that aren't registered (from a previous version):
+
+```bash
+# Use the registration tool to register existing wallets
+.venv/bin/python3 register-wallets.py
+```
+
+Note: `make import-hd-wallet` automatically registers wallets with the API.
+
+### VPS Mining (24/7 Cloud Mining)
+
+Deploy to a remote VPS server:
 
 ```bash
 # 1. Configure VPS
@@ -69,7 +161,12 @@ This miner implements an **optimized challenge selection strategy**:
 
 ### Local Machine
 - Unix-like OS (Linux/macOS)
+- Python 3.8+ with pip
 - `make`, `ssh`, `rsync` installed
+- **For HD Wallet Generation:**
+  - `cardano-address` (included in project root)
+  - `cardano-cli` (installed at `~/.local/bin/cardano-cli`)
+  - `jq` (JSON processor)
 
 ### VPS Server
 - Ubuntu 24.04 LTS (recommended)

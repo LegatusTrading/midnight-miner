@@ -15,9 +15,21 @@ __pycache__/
 
 # Mining runtime files
 wallets.json
+wallets-*.json
 balances.json
 challenges.json
 *.log
+.miner.pid
+developer_addresses.json
+solutions.csv
+
+# HD Wallet files (CRITICAL - Contains private keys!)
+hd-wallets/
+hd-wallets.backup-*/
+wallet-output/
+*.prv
+*.skey
+mnemonic*.txt
 
 # SSH keys and credentials
 *.key
@@ -28,6 +40,13 @@ id_*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Cardano tools (large binaries - downloaded during setup)
+lib/cardano-address*
+lib/cardano-cli*
+lib/*.tar.gz
+cardano-address
+cardano-cli
 
 # Editor files
 .vscode/

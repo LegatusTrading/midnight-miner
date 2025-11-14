@@ -1,0 +1,12 @@
+# Local Configuration
+# Copy this file to local.conf to run miner locally
+
+# Local execution mode (set to "local" to run on this machine)
+MODE=local
+
+# Local data directory for wallets and status
+DATA_DIR=./data/local
+
+# Mining parameters
+WORKERS=8
+WALLETS=16
