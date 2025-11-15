@@ -132,11 +132,8 @@ status-%: load-config-%
 
 # Check Mining Status (with mnemonic and wallet details)
 check-%: load-config-%
-	@echo "=== Wallet check for VPS: $* ==="
 	@HOSTNAME=$$($(MAKE) -s get-hostname-$*); \
-	DATADIR=$$($(MAKE) -s get-datadir-$*); \
-	mkdir -p $$DATADIR; \
-	ssh root@$$HOSTNAME "bash -s" < scripts/get-check-status.sh
+	ssh root@$$HOSTNAME "bash -s $$HOSTNAME" < scripts/get-check-status.sh
 
 # Backup Mining Data
 backup-%: load-config-%
@@ -145,16 +142,21 @@ backup-%: load-config-%
 	DATADIR=$$($(MAKE) -s get-datadir-$*); \
 	TIMESTAMP=$$(date +%Y%m%d-%H%M%S); \
 	mkdir -p $$DATADIR; \
+	echo "Downloading mnemonic..."; \
+	scp -q root@$$HOSTNAME:/root/midnight-miner/hd-wallets/mnemonic.txt $$DATADIR/mnemonic-$$TIMESTAMP.txt 2>/dev/null || echo "  No mnemonic found"; \
 	echo "Downloading wallets.json..."; \
-	scp root@$$HOSTNAME:/root/midnight-miner/wallets.json $$DATADIR/wallets-$$TIMESTAMP.json 2>/dev/null || echo "No wallets.json found"; \
+	scp -q root@$$HOSTNAME:/root/midnight-miner/wallets.json $$DATADIR/wallets-$$TIMESTAMP.json 2>/dev/null || echo "  No wallets.json found"; \
 	echo "Downloading balances.json..."; \
-	scp root@$$HOSTNAME:/root/midnight-miner/balances.json $$DATADIR/balances-$$TIMESTAMP.json 2>/dev/null || echo "No balances.json found"; \
+	scp -q root@$$HOSTNAME:/root/midnight-miner/balances.json $$DATADIR/balances-$$TIMESTAMP.json 2>/dev/null || echo "  No balances.json found"; \
 	echo "Downloading challenges.json..."; \
-	scp root@$$HOSTNAME:/root/midnight-miner/challenges.json $$DATADIR/challenges-$$TIMESTAMP.json 2>/dev/null || echo "No challenges.json found"; \
+	scp -q root@$$HOSTNAME:/root/midnight-miner/challenges.json $$DATADIR/challenges-$$TIMESTAMP.json 2>/dev/null || echo "  No challenges.json found"; \
+	echo "Generating check report..."; \
+	ssh root@$$HOSTNAME "bash -s $$HOSTNAME" < scripts/get-check-status.sh > $$DATADIR/check-$$TIMESTAMP.txt 2>/dev/null; \
 	echo "Generating status report..."; \
-	$(MAKE) status-$*; \
+	ssh root@$$HOSTNAME "bash -s" < scripts/get-status.sh > $$DATADIR/status-$$TIMESTAMP.md 2>/dev/null; \
 	echo ""; \
-	echo "Backup complete! Files saved to $$DATADIR/"
+	echo "Backup complete! Files saved to $$DATADIR/"; \
+	ls -lh $$DATADIR/*-$$TIMESTAMP.*
 
 # Catch-all pattern targets
 init:

@@ -7,38 +7,36 @@ set -e
 MINER_DIR="/root/midnight-miner"
 WALLETS_FILE="$MINER_DIR/wallets.json"
 MNEMONIC_FILE="$MINER_DIR/hd-wallets/mnemonic.txt"
+VPS_IP="${1:-$(hostname -I | awk '{print $1}')}"
 
-echo "=========================================="
-echo "MIDNIGHT MINER - Wallet Check Status"
-echo "=========================================="
 echo ""
-echo "Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-echo "Hostname: $(hostname)"
+echo "=== Check: $(hostname -s) ==="
+echo ""
+echo "- Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+echo "- Host: $(hostname)"
+echo "- IP  : $VPS_IP"
 echo ""
 
-# Display mnemonic
-echo "=========================================="
-echo "SEED PHRASE (24 words)"
-echo "=========================================="
+# Display mnemonic (first 4 words)
+echo "== Wallet: 1"
+echo ""
 if [ -f "$MNEMONIC_FILE" ]; then
-    cat "$MNEMONIC_FILE"
+    MNEMONIC=$(cat "$MNEMONIC_FILE")
+    FIRST_FOUR=$(echo "$MNEMONIC" | awk '{print $1, $2, $3, $4}')
+    echo "- Seed: $FIRST_FOUR .."
 else
-    echo "⚠️  Mnemonic file not found!"
+    echo "- Seed: ⚠️  Mnemonic not found!"
 fi
 echo ""
-echo ""
 
-# Display wallets with solution counts
-echo "=========================================="
-echo "WALLET ADDRESSES"
-echo "=========================================="
-echo ""
-
+# Display wallets with solution counts and API data
 if [ -f "$WALLETS_FILE" ]; then
     python3 << 'PYEOF'
 import json
 import subprocess
 import sys
+import urllib.request
+import urllib.error
 
 # Load wallets
 try:
@@ -56,59 +54,57 @@ try:
     )
     solution_lines = [line for line in result.stdout.split('\n') if 'Solution accepted' in line]
 except Exception as e:
-    print(f"Warning: Could not read journal logs: {e}")
     solution_lines = []
 
-print(f"Total Wallets: {len(wallets)}")
-print("")
-print(f"{'#':<4} {'Solutions':<10} {'Address':<66} {'Link'}")
-print("-" * 140)
+# Filter out developer donation wallet (enterprise address)
+hd_wallets = [w for w in wallets if w['address'].startswith('addr1q')]
 
-for i, wallet in enumerate(wallets):
+print(f"== Addresses: {len(hd_wallets)}")
+print("")
+print(f"{'#':<4} {'Sols':<6} {'Crypto':<8} {'Night':<8} {'Address'}")
+print("-" * 110)
+
+for i, wallet in enumerate(hd_wallets):
     addr = wallet['address']
-    # Use first 39 chars as address prefix (logs truncate around 40 chars)
     addr_prefix = addr[:39]
 
     # Count solutions for this address
     solution_count = sum(1 for line in solution_lines if addr_prefix in line)
 
-    # Create verification link
-    verify_link = f"https://sm.midnight.gd/api/statistics/{addr}"
+    # Note: Crypto/Night data requires web browser access due to Vercel security
+    # Users can click the address to view statistics at: https://sm.midnight.gd/api/statistics/{addr}
+    crypto_receipts = "-"
+    night_allocation = "-"
 
-    print(f"{i:<4} {solution_count:<10} {addr:<66} {verify_link}")
+    print(f"{i:<4} {solution_count:<6} {crypto_receipts:<8} {night_allocation:<8} {addr}")
 
-print("")
+print("-" * 110)
 PYEOF
 else
     echo "⚠️  No wallets file found"
 fi
 
 echo ""
-echo "=========================================="
-echo "MINING STATUS"
-echo "=========================================="
+echo "== Mining"
+echo ""
 
 # Service status
 if systemctl is-active --quiet midnight-miner; then
-    echo "Status: Running ✅"
+    echo "- Status: Running ✅"
 
     # Get latest stats from logs
     LAST_HASHRATE=$(journalctl -u midnight-miner -n 100 --no-pager | grep "Total Hash Rate" | tail -1 | awk '{print $(NF-1), $NF}')
     TOTAL_COMPLETED=$(journalctl -u midnight-miner -n 100 --no-pager | grep "Total Completed" | tail -1 | awk '{print $NF}')
 
     if [ -n "$LAST_HASHRATE" ]; then
-        echo "Hash Rate: $LAST_HASHRATE"
+        echo "- Hash Rate: $LAST_HASHRATE"
     fi
 
     if [ -n "$TOTAL_COMPLETED" ]; then
-        echo "Solutions: $TOTAL_COMPLETED"
+        echo "- Solutions: $TOTAL_COMPLETED"
     fi
 else
-    echo "Status: Stopped ❌"
+    echo "- Status: Stopped ❌"
 fi
 
 echo ""
-echo "=========================================="
-echo "⚠️  IMPORTANT: Keep your seed phrase secure!"
-echo "   Anyone with the seed can access all wallets."
-echo "=========================================="
