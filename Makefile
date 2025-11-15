@@ -130,6 +130,14 @@ status-%: load-config-%
 	echo ""; \
 	echo "Status saved to $$DATADIR/status.md"
 
+# Check Mining Status (with mnemonic and wallet details)
+check-%: load-config-%
+	@echo "=== Wallet check for VPS: $* ==="
+	@HOSTNAME=$$($(MAKE) -s get-hostname-$*); \
+	DATADIR=$$($(MAKE) -s get-datadir-$*); \
+	mkdir -p $$DATADIR; \
+	ssh root@$$HOSTNAME "bash -s" < scripts/get-check-status.sh
+
 # Backup Mining Data
 backup-%: load-config-%
 	@echo "=== Backing up mining data from VPS: $* ==="
