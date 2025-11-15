@@ -71,8 +71,8 @@ for i, wallet in enumerate(hd_wallets):
     # Count solutions for this address
     solution_count = sum(1 for line in solution_lines if addr_prefix in line)
 
-    # Note: Crypto/Night data requires web browser access due to Vercel security
-    # Users can click the address to view statistics at: https://sm.midnight.gd/api/statistics/{addr}
+    # Note: Crypto/Night columns require running locally due to Vercel bot detection
+    # Use: ./scripts/fetch-wallet-stats.py data/<host>/wallets.json
     crypto_receipts = "-"
     night_allocation = "-"
 

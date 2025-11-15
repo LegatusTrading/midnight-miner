@@ -133,7 +133,11 @@ status-%: load-config-%
 # Check Mining Status (with mnemonic and wallet details)
 check-%: load-config-%
 	@HOSTNAME=$$($(MAKE) -s get-hostname-$*); \
-	ssh root@$$HOSTNAME "bash -s $$HOSTNAME" < scripts/get-check-status.sh
+	ssh root@$$HOSTNAME "bash -s $$HOSTNAME" < scripts/get-check-status.sh; \
+	echo ""; \
+	echo "Note: Crypto/Night columns show '-' due to Vercel bot protection."; \
+	echo "      To see actual values, run locally:"; \
+	echo "      ./scripts/fetch-wallet-stats.py data/$*/wallets.json"
 
 # Backup Mining Data
 backup-%: load-config-%
