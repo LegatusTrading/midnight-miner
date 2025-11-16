@@ -1,0 +1,6 @@
+pycardano
+wasmtime
+requests
+cbor2
+portalocker
+mnemonic

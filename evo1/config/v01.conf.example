@@ -1,0 +1,8 @@
+# VPS Configuration for v01
+# Copy this file to v01.conf and customize it
+
+# VPS connection details (must have SSH key access to root)
+HOSTNAME=123.234.33.53
+
+# Local data directory for backups and status
+DATA_DIR=./data/v01

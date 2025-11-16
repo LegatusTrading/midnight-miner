@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && ./generate-hd-wallet.sh --network mainnet --accounts 4 --addresses 1 --output ./hd-wallets\")",
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && .venv/bin/python3 ./import-hd-wallets.py ./hd-wallets 4\")",
+      "Bash(ssh root@51.159.135.76 \"cat /root/midnight-miner/hd-wallets/mnemonic.txt\")",
+      "Bash(mkdir:*)",
+      "Bash(data/v1/mnemonic-baseaddr-test.txt)",
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && .venv/bin/python3 -c \"\"import json; wallets = json.load(open(''wallets.json'')); print(''\\n''.join([f''{i}: {w[\\\"\"address\\\"\"]}'' for i, w in enumerate(wallets)]))\"\"\")",
+      "Bash(ssh root@51.159.135.76 \"systemctl start midnight-miner && sleep 3 && systemctl status midnight-miner --no-pager\")",
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && wc -l wallets.json && head -30 wallets.json\")",
+      "Bash(ssh root@51.159.135.76 \"systemctl stop midnight-miner && sed -i ''s/--wallets 16/--wallets 4/g'' /etc/systemd/system/midnight-miner.service && systemctl daemon-reload && cat /etc/systemd/system/midnight-miner.service | grep ExecStart\")",
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && .venv/bin/python3 -c \"\"import json; wallets = json.load(open(''wallets.json'')); baseaddr_wallets = [w for w in wallets if w[''address''].startswith(''addr1q'')]; json.dump(baseaddr_wallets, open(''wallets.json'', ''w''), indent=2); print(f''Kept {len(baseaddr_wallets)} base address wallets'')\"\"\")",
+      "Bash(ssh root@51.159.135.76 \"systemctl start midnight-miner && sleep 3 && journalctl -u midnight-miner -n 30 --no-pager\")",
+      "Bash(ssh root@51.159.135.76 \"journalctl -u midnight-miner --since ''5 minutes ago'' --no-pager | grep -i solution\")",
+      "Bash(ssh root@51.159.135.76 \"journalctl -u midnight-miner --since ''22:19:00'' --no-pager | grep ''Solution accepted''\")",
+      "Bash(ssh root@51.159.135.76 \"journalctl -u midnight-miner -n 50 --no-pager | grep -E ''(Total Completed|addr1q.*Solution accepted)''\")",
+      "Bash(chmod:*)",
+      "Bash(cat:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(ssh root@51.159.135.76 \"cd /root/midnight-miner && rm -rf hd-wallets && rm -f cardano-address cardano-cli lib/cardano-address lib/cardano-cli && echo ''Cleaned up old wallet and tools''\")",
+      "Bash(make init-s2:*)",
+      "Bash(ssh:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:support.nu.fi)",
+      "Bash(rsync:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
