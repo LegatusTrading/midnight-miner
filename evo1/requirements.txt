@@ -4,3 +4,4 @@ requests
 cbor2
 portalocker
 mnemonic
+playwright
