@@ -16,6 +16,8 @@ help:
 	@echo "  status-<host> - Show mining status and save to status.md"
 	@echo "  status-all    - Show summary status for all VPSs"
 	@echo "  backup-<host> - Backup wallets and status to local data/ folder"
+	@echo "  bck-<host>    - Better check (fast, local data from challenges.json)"
+	@echo "  bcka-<host>   - Better check with API (queries live stats via browser)"
 	@echo ""
 	@echo "Example:"
 	@echo "  make init-v01"
@@ -591,3 +593,22 @@ verify-local:
 	else \
 		python3 verify-hd-wallets.py; \
 	fi
+
+# =====================================================
+# BCHECK - Better Check (comprehensive wallet checker)
+# =====================================================
+
+# Better check - discovers all seed phrases and wallets, shows mining status
+# Runs LOCALLY and connects to remote server via SSH
+# Usage: make bck-s3     (fast, uses local data from challenges.json)
+#        make bcka-s3    (with API queries using local browser automation)
+bck-%: load-config-%
+	@echo "=== Better Check for VPS: $* ==="
+	@HOSTNAME=$$($(MAKE) -s get-hostname-$*); \
+	cd evo1 && .venv/bin/python3 scripts/bcheck.py $$HOSTNAME
+
+# Better check with API queries (uses local browser automation to bypass bot protection)
+bcka-%: load-config-%
+	@echo "=== Better Check (with API) for VPS: $* ==="
+	@HOSTNAME=$$($(MAKE) -s get-hostname-$*); \
+	cd evo1 && .venv/bin/python3 scripts/bcheck.py $$HOSTNAME --api
